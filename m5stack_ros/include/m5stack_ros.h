@@ -6,6 +6,8 @@
 // If you use Wi-Fi, define ROSSERIAL_ARDUINO_TCP
 // If you use USB, do not define anything
 
+#define ROSSERIAL_ARDUINO_BLUETOOTH
+
 #include <M5Stack.h>
 #include <esp_info.h>
 
