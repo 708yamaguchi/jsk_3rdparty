@@ -6,7 +6,7 @@
 // Mainly copied from
 // https://github.com/m5stack/M5-ProductExampleCodes/tree/master/Unit/TVOC/TVOC
 
-#include "m5stack_ros.h"
+#include "m5stack_ros_attachable.h"
 #include <std_msgs/UInt16.h>
 #include <sound_play/SoundRequestActionGoal.h>
 #include "Adafruit_SGP30.h"
@@ -79,9 +79,13 @@ void setup() {
   nh.advertise(tvoc_pub);
   nh.advertise(eco2_pub);
   nh.advertise(sound_pub);
+
+  afterSetup();
 }
 
 void loop() {
+  beforeLoop();
+
   loopTVOCSGP30();
 
   tvoc_msg.data = sgp.TVOC;
