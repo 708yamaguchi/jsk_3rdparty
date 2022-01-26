@@ -10,7 +10,7 @@ Connect the devices to ROS via [M5Stack](https://m5stack.com/) and [rosserial](h
     mkdir ~/catkin_ws/src -p
     cd ~/catkin_ws/src
     wstool init
-    wstool merge https://raw.githubusercontent.com/jsk-ros-pkg/jsk_3rdparty/master/m5stack_ros/m5stack_ros.rosinstall
+    wstool merge https://raw.githubusercontent.com/708yamaguchi/jsk_3rdparty/attachable-module/m5stack_ros/m5stack_ros.rosinstall
     wstool up
     rosdep install --ignore-src --from-path . -y -r
     cd ~/catkin_ws
