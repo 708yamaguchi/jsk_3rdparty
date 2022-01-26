@@ -1,7 +1,7 @@
 - git:
     local-name: jsk-ros-pkg/jsk_3rdparty
-    uri: https://github.com/jsk-ros-pkg/jsk_3rdparty.git
-    version: master
+    uri: https://github.com/708yamaguchi/jsk_3rdparty.git
+    version: attachable-module
 # Use master branch if the following PR is merged
 # https://github.com/ros-drivers/rosserial/pull/570
 - git:
