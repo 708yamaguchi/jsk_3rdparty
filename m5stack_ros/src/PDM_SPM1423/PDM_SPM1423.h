@@ -72,10 +72,8 @@ bool InitI2SSpakerOrMic(int mode)
     return true;
 }
 
-static void i2sMicroFFTtask(void *arg)
+static void readMic(void *arg)
 {
-    uint8_t FFTDataBuff[128];
-    uint8_t FFTValueBuff[24];
     int16_t* buffptr;
     double data = 0;
     float adc_data;
@@ -97,7 +95,6 @@ static void i2sMicroFFTtask(void *arg)
         }
         else if( state == MODE_MIC )
         {
-            // fft_config_t *real_fft_plan = fft_init(1024, FFT_REAL, FFT_FORWARD, NULL, NULL);
             i2s_read(I2S_NUM_0, (char *)microRawData, 2048, &bytesread, (100 / portTICK_RATE_MS));
         }
         else
@@ -106,6 +103,9 @@ static void i2sMicroFFTtask(void *arg)
         }
     }
 }
+
+xTaskHandle xTaskMic;
+xTaskHandle xTaskBattery;
 
 void microPhoneSetup()
 {
@@ -116,5 +116,5 @@ void microPhoneSetup()
   }
 
   InitI2SSpakerOrMic(MODE_MIC);
-  xTaskCreatePinnedToCore(i2sMicroFFTtask, "microPhoneTask", 4096, NULL, 3, NULL, 0);
+  xTaskCreatePinnedToCore(readMic, "microPhoneTask", 4096, NULL, 3, &xTaskMic, 0);
 }
