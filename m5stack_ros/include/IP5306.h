@@ -35,6 +35,9 @@ void measureIP5306()
     else if (retval == 0x80) battery_level = 75;
     else if (retval == 0x00) battery_level = 100;
   }
+  else {
+    Serial.println("Cannot communicate with IP5306 battery module.");
+  }
 
   // is M5Stack Charging?
   isCharging = M5.Power.isCharging();
