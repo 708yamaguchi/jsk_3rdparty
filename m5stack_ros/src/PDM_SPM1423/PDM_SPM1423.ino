@@ -1,5 +1,5 @@
 #include <m5stack_ros_attachable.h>
-#include "PDM_SPM1423.h"
+#include <PDM_SPM1423.h>
 #include <audio_common_msgs/AudioData.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
