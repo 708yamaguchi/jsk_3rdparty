@@ -1,5 +1,4 @@
-#include <m5stack_ros.h>
-#include <IP5306.h>
+#include <m5stack_ros_attachable.h>
 #include "PDM_SPM1423.h"
 #include <audio_common_msgs/AudioData.h>
 #include <std_msgs/Bool.h>
@@ -12,10 +11,6 @@ audio_common_msgs::AudioData audio_msg;
 ros::Publisher audio_pub("audio", &audio_msg);
 std_msgs::Float32 volume_msg;
 ros::Publisher volume_pub("volume", &volume_msg);
-std_msgs::UInt16 level_msg;
-ros::Publisher level_pub("battery_level", &level_msg);
-std_msgs::Bool charging_msg;
-ros::Publisher charging_pub("is_charging", &charging_msg);
 
 void pubBattery() {
   // Enable I2C
@@ -38,27 +33,42 @@ void pubAudio() {
   drawVolume(volume);
 }
 
+// Usage: enableI2C() -> Use I2C device -> disableI2C()
+void enableI2C() {
+  // Stop I2S
+  i2s_stop(I2S_NUM_0);
+  // Start I2C
+  Wire.begin();
+}
+void disableI2C() {
+  // Stop I2C
+  Wire.endTransmission(true);
+  // Start I2S
+  i2s_driver_uninstall(I2S_NUM_0);
+  InitI2SSpakerOrMic(MODE_MIC);
+}
+
 void setup() {
   setupM5stackROS();
   setupIP5306();
   microPhoneSetup();
+  header("PDM Unit", BLACK);
   nh.advertise(audio_pub);
   nh.advertise(volume_pub);
-  nh.advertise(level_pub);
-  nh.advertise(charging_pub);
-  header("PDM Unit", BLACK);
+  enableI2C();
+  strcpy(sensor_type, "microphone");
+  strcpy(attach_type, "absorption_sheet");
+  afterSetup();
+  disableI2C();
 }
 
 void loop() {
   if (loop_count == 1000) {
     // Publish battery info while stopping publishing audio info
     // This is because I2C and I2S share the pin and they can't be measured simultaneously
-    i2s_stop(I2S_NUM_0);    
-    Wire.begin();
-    pubBattery();
-    Wire.endTransmission(true);
-    i2s_driver_uninstall(I2S_NUM_0);
-    InitI2SSpakerOrMic(MODE_MIC);
+    enableI2C();
+    beforeLoop();
+    disableI2C();
     loop_count = 0;
   }
   else {
