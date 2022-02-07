@@ -57,7 +57,6 @@ void loop() {
     loop_count = 0;
   }
   else {
-    calcVolume();
     pubAudio();
   }
   nh.spinOnce();
