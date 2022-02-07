@@ -124,3 +124,24 @@ void microPhoneSetup()
 
   InitI2SSpakerOrMic(MODE_MIC);
 }
+
+
+// If you connect PDM_SPM1423 mic to M5Stack Grove connector,
+// you cannot use I2S and I2C devices simultaneously.
+// In that case, try the following functions.
+// Use I2S device -> enableI2C() -> Use I2C device -> disableI2C() -> Use I2S device
+void enableI2C() {
+  // Stop I2S
+  i2s_stop(I2S_NUM_0);
+  // Start I2C
+  Wire.begin();
+}
+
+
+void disableI2C() {
+  // Stop I2C
+  Wire.endTransmission(true);
+  // Start I2S
+  i2s_driver_uninstall(I2S_NUM_0);
+  InitI2SSpakerOrMic(MODE_MIC);
+}

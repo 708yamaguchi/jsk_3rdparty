@@ -33,21 +33,6 @@ void pubAudio() {
   drawVolume(volume);
 }
 
-// Usage: enableI2C() -> Use I2C device -> disableI2C()
-void enableI2C() {
-  // Stop I2S
-  i2s_stop(I2S_NUM_0);
-  // Start I2C
-  Wire.begin();
-}
-void disableI2C() {
-  // Stop I2C
-  Wire.endTransmission(true);
-  // Start I2S
-  i2s_driver_uninstall(I2S_NUM_0);
-  InitI2SSpakerOrMic(MODE_MIC);
-}
-
 void setup() {
   setupM5stackROS();
   setupIP5306();
