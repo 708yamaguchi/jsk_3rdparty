@@ -48,6 +48,7 @@ void setup() {
 }
 
 void loop() {
+  // audio topic is published at about 35Hz, so battery topic is published once in about 30sec
   if (loop_count == 1000) {
     // Publish battery info while stopping publishing audio info
     // This is because I2C and I2S share the pin and they can't be measured simultaneously
@@ -55,6 +56,8 @@ void loop() {
     beforeLoop();
     disableI2C();
     loop_count = 0;
+    // Remove noisy audio data right after I2S starts
+    delay(200);
   }
   else {
     pubAudio();
