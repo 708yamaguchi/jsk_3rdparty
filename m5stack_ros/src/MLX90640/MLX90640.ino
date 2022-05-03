@@ -1,7 +1,7 @@
 // Mainly copied from
 // https://github.com/m5stack/M5-ProductExampleCodes/tree/master/Unit/THERMAL/Arduino
 
-#include <m5stack_ros.h>
+#include <m5stack_ros_attachable.h>
 #include <sensor_msgs/Image.h>
 #include <std_msgs/Int16.h>
 #include "MLX90640.h"
@@ -80,10 +80,14 @@ void setup()
   nh.advertise(max_pub);
   nh.advertise(center_pub);
   nh.advertise(img_pub);
+  strcpy(sensor_type, "thermography");
+  strcpy(attach_type, "absorption_sheet");
+  afterSetup();
 }
 
 void loop()
 {
+  beforeLoop();
   loopMLX90640();
   pubMinTemp();
   pubMaxTemp();

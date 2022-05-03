@@ -80,6 +80,8 @@ void setup() {
   nh.advertise(eco2_pub);
   nh.advertise(sound_pub);
 
+  strcpy(sensor_type, "co2_sensor");
+  strcpy(attach_type, "absorption_sheet");
   afterSetup();
 }
 

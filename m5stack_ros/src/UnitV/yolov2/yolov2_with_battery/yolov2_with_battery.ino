@@ -1,15 +1,11 @@
 // See
 // https://qiita.com/Nabeshin/items/9268dc88927123319549
 
-#include <m5stack_ros.h>
+#include <m5stack_ros_attachable.h>
 #include <sensor_msgs/CompressedImage.h>
 #include <jsk_recognition_msgs/Rect.h>
 #include <jsk_recognition_msgs/RectArray.h>
 #include <jsk_recognition_msgs/ClassificationResult.h>
-
-#include <IP5306.h>
-#include <std_msgs/Bool.h>
-#include <std_msgs/UInt16.h>
 
 // UART jpg communication
 typedef struct {
@@ -29,11 +25,6 @@ jsk_recognition_msgs::RectArray unitv_rects_msg;
 ros::Publisher unitv_rects_pub("unitv_image/rects", &unitv_rects_msg);
 jsk_recognition_msgs::ClassificationResult unitv_class_msg;
 ros::Publisher unitv_class_pub("unitv_image/class", &unitv_class_msg);
-
-std_msgs::UInt16 level_msg;
-ros::Publisher level_pub("battery_level", &level_msg);
-std_msgs::Bool charging_msg;
-ros::Publisher charging_pub("is_charging", &charging_msg);
 
 char class_str[17];
 int rects[4] = {0, 0, 0, 0};
@@ -161,15 +152,6 @@ void disableI2C() {
   Serial2.begin(115200, SERIAL_8N1, 21, 22);
 }
 
-void publishBattery() {
-  measureIP5306();
-  level_msg.data = battery_level;
-  charging_msg.data = isCharging;
-  level_pub.publish(&level_msg);
-  charging_pub.publish(&charging_msg);
-  nh.spinOnce();
-}
-
 void setup() {
   setupM5stackROS();
 
@@ -183,21 +165,22 @@ void setup() {
   delay(8000);
   enableI2C();
   setupIP5306();
+  strcpy(sensor_type, "ai_camera");
+  strcpy(attach_type, "absorption_sheet");
+  afterSetup();
   disableI2C();
 
   nh.advertise(unitv_img_pub);
   nh.advertise(unitv_rects_pub);
   nh.advertise(unitv_class_pub);
-  nh.advertise(level_pub);
-  nh.advertise(charging_pub);
 }
 
 void loop() {
   // For every 100 UnitV images published, battery info is published.
   // Note that UnitV image is published at about 1Hz
-  if (loop_count == 100) {
+  if (loop_count == 10) {
     enableI2C();
-    publishBattery();
+    beforeLoop();
     disableI2C();
     loop_count = 0;
   }
