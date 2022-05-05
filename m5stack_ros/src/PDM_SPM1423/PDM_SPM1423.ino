@@ -8,9 +8,9 @@
 int loop_count = 0;
 
 audio_common_msgs::AudioData audio_msg;
-ros::Publisher audio_pub("audio", &audio_msg);
+ros::Publisher audio_pub("pdm_audio", &audio_msg);
 std_msgs::Float32 volume_msg;
-ros::Publisher volume_pub("volume", &volume_msg);
+ros::Publisher volume_pub("pdm_volume", &volume_msg);
 
 void pubBattery() {
   // Enable I2C
