@@ -5,7 +5,7 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/UInt16.h>
 
-int loop_count = 0;
+int loop_count = 1000;
 
 audio_common_msgs::AudioData audio_msg;
 ros::Publisher audio_pub("pdm_audio", &audio_msg);
@@ -41,6 +41,7 @@ void setup() {
   nh.advertise(audio_pub);
   nh.advertise(volume_pub);
   enableI2C();
+  measureIP5306();
   strcpy(sensor_type, "microphone");
   strcpy(attach_type, "absorption_sheet");
   afterSetup();
