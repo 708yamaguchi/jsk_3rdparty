@@ -1,5 +1,5 @@
 #include <MPU9250.h>
-#include <m5stack_ros.h>
+#include <m5stack_ros_attachable.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/Temperature.h>
 
@@ -12,15 +12,19 @@ void setup()
 {
   setupM5stackROS();
   setupMPU9250();
-
   nh.advertise(imu_pub);
   nh.advertise(temp_pub);
+
+  strcpy(sensor_type, "IMU");
+  strcpy(attach_type, "absorption_sheet");
+  afterSetup();
 }
 
 void loop()
 {
-  measureMPU9250();
+  beforeLoop();
 
+  measureMPU9250();
   displayMPU9250();
 
   // Publish IMU
