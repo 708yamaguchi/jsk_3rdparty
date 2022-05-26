@@ -18,8 +18,14 @@ Published topics:
 
 - Follow [README.md](https://github.com/jsk-ros-pkg/jsk_3rdparty/tree/master/m5stack_ros)
 
-- Run (Note that `M5StickC` and `M5StickC Plus` is tested)
+- Run
 
   ```bash
   roslaunch m5stack_ros m5stack_ros.launch
   ```
+
+- Note that `M5StickC` and `M5StickC Plus` is tested.
+
+- In the `EARTH_with_email` sample, `/email` topic (`jsk_robot_startup/Email`) is published when the `moisture` is over threshold.
+
+  This is used to report the amount of water in the spot cooler tank.
