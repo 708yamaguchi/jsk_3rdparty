@@ -1,0 +1,14 @@
+<launch>
+
+  <!-- Publish /email topic based on the earth sensor and M5StickC state -->
+  <node pkg="rosserial_python" type="serial_node.py" name="earth_with_email"
+        args="tcp" respawn="true" output="screen">
+    <rosparam>
+      baud: 115200
+    </rosparam>
+  </node>
+
+  <!-- Email info like receiver address is included in the /email topic -->
+  <node pkg="jsk_robot_startup" type="email_topic.py" name="email_topic_server" />
+
+</launch>
