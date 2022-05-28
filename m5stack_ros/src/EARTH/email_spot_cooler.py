@@ -40,6 +40,7 @@ class EmailSpotCooler(object):
 
     def moisture_cb(self, msg):
         self.moisture = msg.data
+        rospy.loginfo('I got moisture data: {}'.format(self.moisture))
         rospy.last_communication = rospy.Time.now()
         # Reset rosserial because the connection is terminated by M5StickC
         # after M5StickC sends topic
