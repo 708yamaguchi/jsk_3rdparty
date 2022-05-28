@@ -56,9 +56,8 @@ class EmailSpotCooler(object):
         if self.moisture < 3000:
             body += 'タンクに水が溜まっています。交換してください。\n'
             body += 'moisture: {}'.format(self.moisture)
-
         else:
-            body += 'タンクに水は溜まっていません。\b'
+            body += 'タンクに水は溜まっていません。\n'
             body += 'moisture: {}'.format(self.moisture)
         # Check communication status
         elapsed_time = rospy.Time.now() - self.last_communication
