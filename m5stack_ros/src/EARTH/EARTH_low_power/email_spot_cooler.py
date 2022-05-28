@@ -32,7 +32,7 @@ class EmailSpotCooler(object):
         self.last_communication = rospy.Time.now()
         # Subscribe moisture
         rospy.Subscriber('moisture', Int16, self.moisture_cb)
-        self.moisture = 4096  # 0: most moist, 4096: least moist
+        self.moisture = 4096  # 0: most moist, 4095: least moist
         # Publish email
         self.pub = rospy.Publisher('email', Email, queue_size=1)
         # Timer callback to send email every 24 hours
@@ -54,10 +54,12 @@ class EmailSpotCooler(object):
         body = ''
         # Check amount of the water
         if self.moisture < 3000:
-            body += 'タンクに水が溜まっています。交換してください。'
+            body += 'タンクに水が溜まっています。交換してください。\n'
+            body += 'moisture: {}'.format(self.moisture)
 
         else:
-            body += 'タンクに水は溜まっていません。'
+            body += 'タンクに水は溜まっていません。\b'
+            body += 'moisture: {}'.format(self.moisture)
         # Check communication status
         elapsed_time = rospy.Time.now() - self.last_communication
         if (elapsed_time.secs > 24 * 60 * 60):
