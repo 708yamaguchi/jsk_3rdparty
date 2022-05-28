@@ -84,6 +84,9 @@ class EmailSpotCooler(object):
             rospy.logerr(serr)
             rospy.logerr('Skip killing rosserial')
         else:
+            # To kill rosserial completely, call kill twice
+            subprocess.call(['kill', str(pid)])
+            rospy.sleep(5)
             subprocess.call(['kill', str(pid)])
             rospy.loginfo('Reset rosserial by sending SIGTERM to rosserial')
 
