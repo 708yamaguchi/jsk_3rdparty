@@ -58,11 +58,11 @@ class EmailSpotCooler(object):
             body += 'moisture: {}'.format(self.moisture)
         else:
             body += 'タンクに水は溜まっていません。\n'
-            body += 'moisture: {}'.format(self.moisture)
+            body += 'moisture: {}\n'.format(self.moisture)
         # Check communication status
         elapsed_time = rospy.Time.now() - self.last_communication
         if (elapsed_time.secs > 24 * 60 * 60):
-            body += '1日以上、M5StickCと通信が出来ていません。情報が古い可能性があります。'
+            body += '1日以上、M5StickCと通信が出来ていません。情報が古い可能性があります。\n'
         # TODO: Check M5StickC battery
         email_msg.body = body
         self.pub.publish(email_msg)
