@@ -5,7 +5,7 @@ from jsk_robot_startup.msg import Email
 import rosgraph
 import rosnode
 import rospy
-from std_msgs.msg import Int16
+from std_msgs.msg import Bool, Float32, Int16
 import subprocess
 from socket import error as socket_error
 
@@ -32,7 +32,11 @@ class EmailSpotCooler(object):
         self.last_communication = rospy.Time.now()
         # Subscribe moisture
         rospy.Subscriber('moisture', Int16, self.moisture_cb)
-        self.moisture = 4096  # 0: most moist, 4095: least moist
+        rospy.Subscriber('low_battery', Bool, self.low_battery_cb)
+        rospy.Subscriber('battery_level', Float32, self.battery_level_cb)
+        self.moisture = None  # 0: most moist, 4095: least moist
+        self.low_bat = False
+        self.bat_level = None
         # Publish email
         self.pub = rospy.Publisher('email', Email, queue_size=1)
         # Timer callback to send email every 24 hours
@@ -41,10 +45,19 @@ class EmailSpotCooler(object):
     def moisture_cb(self, msg):
         self.moisture = msg.data
         rospy.loginfo('I got moisture data: {}'.format(self.moisture))
-        rospy.last_communication = rospy.Time.now()
+        self.last_communication = rospy.Time.now()
         # Reset rosserial because the connection is terminated by M5StickC
         # after M5StickC sends topic
+        rospy.sleep(3)  # Wait for other callback functions to exit
         self.reset_rosserial()
+
+    def low_battery_cb(self, msg):
+        self.low_bat = msg.data
+        rospy.loginfo('I got low_battery data: {}'.format(self.low_bat))
+
+    def battery_level_cb(self, msg):
+        self.bat_level = msg.data
+        rospy.loginfo('I got battery_level data: {}'.format(self.bat_level))
 
     def send_email(self, event):
         email_msg = Email()
@@ -53,17 +66,27 @@ class EmailSpotCooler(object):
         email_msg.subject = 'スポットクーラーのタンクの水量'
         body = ''
         # Check amount of the water
-        if self.moisture < 3000:
-            body += 'タンクに水が溜まっています。交換してください。\n'
-            body += 'moisture: {}'.format(self.moisture)
-        else:
+        if self.moisture is None or self.moisture > 3000:
             body += 'タンクに水は溜まっていません。\n'
-            body += 'moisture: {}\n'.format(self.moisture)
+        else:
+            body += 'タンクに水が溜まっています。交換してください。\n'
+        body += '水分量 {} （基準値3000）\n'.format(self.moisture)
+        body += '\n'  # end of this section
+        # Check M5StickC battery
+        if self.low_bat:
+            body += 'M5StickCのバッテリ残量はわずかです。充電してください。\n'
+        else:
+            body += 'M5StickCのバッテリ残量は十分です。\n'
+        body += 'バッテリ残量 {}[V]'.format(self.bat_level)
+        body += '\n'  # end of this section
         # Check communication status
         elapsed_time = rospy.Time.now() - self.last_communication
         if (elapsed_time.secs > 24 * 60 * 60):
             body += '1日以上、M5StickCと通信が出来ていません。情報が古い可能性があります。\n'
-        # TODO: Check M5StickC battery
+        body += '最後に通信した時刻 {} (UNIX time)\n'.format(
+            self.last_communication.secs)
+        body += '\n'  # end of this section
+        # Publish Email
         email_msg.body = body
         self.pub.publish(email_msg)
         rospy.loginfo('Send email')
