@@ -29,7 +29,7 @@ class EmailSpotCooler(object):
 
     def __init__(self):
         self.rosserial_name = rospy.get_param('~rosserial_name')
-        self.last_communication = rospy.Time.now()
+        self.last_communication = None
         # Subscribe moisture
         rospy.Subscriber('moisture', Int16, self.moisture_cb)
         rospy.Subscriber('low_battery', Bool, self.low_battery_cb)
@@ -80,11 +80,13 @@ class EmailSpotCooler(object):
         body += 'バッテリ残量 {}[V]'.format(self.bat_level)
         body += '\n'  # end of this section
         # Check communication status
-        elapsed_time = rospy.Time.now() - self.last_communication
-        if (elapsed_time.secs > 24 * 60 * 60):
+        if self.last_communication is None:
+            body += 'まだM5StickCと通信が出来ていません。\n'
+        elif rospy.Time.now() - self.last_communication > 24 * 60 * 60:
             body += '1日以上、M5StickCと通信が出来ていません。情報が古い可能性があります。\n'
-        body += '最後に通信した時刻 {} (UNIX time)\n'.format(
-            self.last_communication.secs)
+        else:
+            body += '最後に通信した時刻 {} (UNIX time)\n'.format(
+                self.last_communication.secs)
         body += '\n'  # end of this section
         # Publish Email
         email_msg.body = body
