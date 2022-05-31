@@ -59,35 +59,50 @@ class EmailSpotCooler(object):
         self.bat_level = msg.data
         rospy.loginfo('I got battery_level data: {}'.format(self.bat_level))
 
+    # Check amount of the water in the tank
+    def water_message(self):
+        message = ''
+        if self.moisture is None or self.moisture > 3000:
+            message += 'タンクに水は溜まっていません。\n'
+        else:
+            message += 'タンクに水が溜まっています。交換してください。\n'
+        message += '水分量 {} （基準値3000）\n'.format(self.moisture)
+        message += '\n'  # end of this section
+        return message
+
+    # Check M5StickC battery
+    def battery_message(self):
+        message = ''
+        if self.low_bat:
+            message += 'M5StickCのバッテリ残量はわずかです。充電してください。\n'
+        else:
+            message += 'M5StickCのバッテリ残量は十分です。\n'
+        message += 'バッテリ残量 {}[V]'.format(self.bat_level)
+        message += '\n'  # end of this section
+
+    # Check communication status
+    def comm_message(self):
+        message = ''
+        if self.last_communication is None:
+            message += 'まだM5StickCと通信が出来ていません。\n'
+        elif rospy.Time.now() - self.last_communication > 24 * 60 * 60:
+            message += '1日以上、M5StickCと通信が出来ていません。情報が古い可能性があります。\n'
+        else:
+            message += '最後に通信した時刻 {} (UNIX time)\n'.format(
+                self.last_communication.secs)
+        message += '\n'  # end of this section
+
     def send_email(self, event):
+        # TODO
+        # Publish email if the tank is full of water or battery is low, not always
         email_msg = Email()
         now = rospy.Time.now()
         email_msg.header.stamp = now
         email_msg.subject = 'スポットクーラーのタンクの水量'
         body = ''
-        # Check amount of the water
-        if self.moisture is None or self.moisture > 3000:
-            body += 'タンクに水は溜まっていません。\n'
-        else:
-            body += 'タンクに水が溜まっています。交換してください。\n'
-        body += '水分量 {} （基準値3000）\n'.format(self.moisture)
-        body += '\n'  # end of this section
-        # Check M5StickC battery
-        if self.low_bat:
-            body += 'M5StickCのバッテリ残量はわずかです。充電してください。\n'
-        else:
-            body += 'M5StickCのバッテリ残量は十分です。\n'
-        body += 'バッテリ残量 {}[V]'.format(self.bat_level)
-        body += '\n'  # end of this section
-        # Check communication status
-        if self.last_communication is None:
-            body += 'まだM5StickCと通信が出来ていません。\n'
-        elif rospy.Time.now() - self.last_communication > 24 * 60 * 60:
-            body += '1日以上、M5StickCと通信が出来ていません。情報が古い可能性があります。\n'
-        else:
-            body += '最後に通信した時刻 {} (UNIX time)\n'.format(
-                self.last_communication.secs)
-        body += '\n'  # end of this section
+        body += self.water_message()
+        body += self.battery_message()
+        body += self.comm_message()
         # Publish Email
         email_msg.body = body
         self.pub.publish(email_msg)
