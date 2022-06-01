@@ -79,6 +79,7 @@ class EmailSpotCooler(object):
             message += 'M5StickCのバッテリ残量は十分です。\n'
         message += 'バッテリ残量 {}[V]'.format(self.bat_level)
         message += '\n'  # end of this section
+        return message
 
     # Check communication status
     def comm_message(self):
@@ -91,6 +92,7 @@ class EmailSpotCooler(object):
             message += '最後に通信した時刻 {} (UNIX time)\n'.format(
                 self.last_communication.secs)
         message += '\n'  # end of this section
+        return message
 
     def send_email(self, event):
         # TODO
