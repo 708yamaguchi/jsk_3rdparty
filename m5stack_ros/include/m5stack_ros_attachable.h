@@ -95,6 +95,7 @@ void beforeLoop() {
       delay(1000);
     }
     if (isCharging) {
+      M5.Lcd.setBrightness(255);
       blinkCharging();
     }
     nh.spinOnce();
