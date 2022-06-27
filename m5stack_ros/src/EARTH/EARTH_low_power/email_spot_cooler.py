@@ -89,7 +89,7 @@ class EmailSpotCooler(object):
         message = ''
         if self.last_communication is None:
             message += 'まだM5StickCと通信が出来ていません。\n'
-        elif rospy.Time.now() - self.last_communication > 24 * 60 * 60:
+        elif (rospy.Time.now() - self.last_communication).secs > 24 * 60 * 60:
             message += '1日以上、M5StickCと通信が出来ていません。情報が古い可能性があります。\n'
         else:
             message += '最後に通信した時刻 {} (UNIX time)\n'.format(
@@ -102,6 +102,7 @@ class EmailSpotCooler(object):
         now = rospy.Time.now()
         email_msg.header.stamp = now
         email_msg.subject = 'スポットクーラーのタンクの水量'
+
         body = ''
         body += self.water_message()
         body += self.battery_message()
@@ -116,18 +117,23 @@ class EmailSpotCooler(object):
 
     def check_status(self, event):
         # Send email as soon as possible when the water is full
-        if self.moisture > self.moisture_thre:
+        if self.moisture < self.moisture_thre:
             self.send_email()
+            rospy.loginfo('Send email because tank water is full')
         # Send email if battery is low
         if self.low_bat:
             self.send_email()
+            rospy.loginfo('Send email because battery is low')
         # Send email when this program starts or email is not sent for a day
-        if self.last_communication is None:
+        if self.last_send_email is None:
             self.send_email()
-        elif rospy.Time.now() - self.last_communication > 24 * 60 * 60:
+            rospy.loginfo('Send email at first time')
+        elif (rospy.Time.now() - self.last_send_email).secs > 24 * 60 * 60:
             self.send_email()
+            rospy.loginfo(
+                'Send email because email have not been sent for a day')
         else:
-            pass
+            rospy.loginfo('Timer is called, but do not send email')
 
     # Reset rosserial by sending SIGTERM to rosserial
     # See https://answers.ros.org/question/271776/how-can-i-retrieve-a-list-of-process-ids-of-ros-nodes/  # NOQA
