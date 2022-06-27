@@ -9,6 +9,8 @@
     </rosparam>
   </node>
 
+  <!-- email_spot_cooler.py gets spot cooler and M5StickC status via rostopic,
+       and then publish /email topic for the following email_topic.py -->
   <node pkg="m5stack_ros" type="email_spot_cooler.py" name="email_spot_cooler"
         output="screen" respawn="true">
     <rosparam subst_value="true">
@@ -16,6 +18,9 @@
     </rosparam>
   </node>
 
+  <!-- email_topic.py subscribes /email topic and send email -->
+  <!-- For detailed usage, please see
+       https://github.com/jsk-ros-pkg/jsk_robot/tree/master/jsk_robot_common/jsk_robot_startup#scriptsemail_topicpy -->
   <node pkg="jsk_robot_startup" type="email_topic.py" name="email_topic_server"
         output="screen"/>
 
