@@ -64,5 +64,5 @@ void loop()
   nh.spinOnce();
   delay(3000); // Wait for topics to be published
 
-  esp_deep_sleep(6 * 60 * 60 * 1000 * 1000); // Retart after 6 hours
+  esp_deep_sleep(1 * 60 * 60 * 1000 * 1000); // Retart after 1 hours
 }

@@ -30,17 +30,20 @@ class EmailSpotCooler(object):
     def __init__(self):
         self.rosserial_name = rospy.get_param('~rosserial_name')
         self.last_communication = None
+        self.last_send_email = None
         # Subscribe moisture
         rospy.Subscriber('moisture', Int16, self.moisture_cb)
         rospy.Subscriber('low_battery', Bool, self.low_battery_cb)
         rospy.Subscriber('battery_level', Float32, self.battery_level_cb)
         self.moisture = None  # 0: most moist, 4095: least moist
+        self.moisture_thre = 3000
         self.low_bat = False
         self.bat_level = None
         # Publish email
         self.pub = rospy.Publisher('email', Email, queue_size=1)
-        # Timer callback to send email every 24 hours
-        rospy.Timer(rospy.Duration(24 * 60 * 60), self.send_email)
+        # Check status of M5StickC and EARTH sensor
+        # When full water, low battery or next day, send email
+        rospy.Timer(rospy.Duration(0.5 * 60 * 60), self.check_status)
 
     def moisture_cb(self, msg):
         self.moisture = msg.data
@@ -62,7 +65,7 @@ class EmailSpotCooler(object):
     # Check amount of the water in the tank
     def water_message(self):
         message = ''
-        if self.moisture is None or self.moisture > 3000:
+        if self.moisture is None or self.moisture > self.moisture_thre:
             message += 'タンクに水は溜まっていません。\n'
         else:
             message += 'タンクに水が溜まっています。交換してください。\n'
@@ -94,9 +97,7 @@ class EmailSpotCooler(object):
         message += '\n'  # end of this section
         return message
 
-    def send_email(self, event):
-        # TODO
-        # Publish email if the tank is full of water or battery is low, not always
+    def send_email(self):
         email_msg = Email()
         now = rospy.Time.now()
         email_msg.header.stamp = now
@@ -108,9 +109,25 @@ class EmailSpotCooler(object):
         # Publish Email
         email_msg.body = body
         self.pub.publish(email_msg)
+        self.last_send_email = rospy.Time.now()
         rospy.loginfo('Send email')
         # Reset rosserial regularly to avoid failing communication eternally
         self.reset_rosserial()
+
+    def check_status(self, event):
+        # Send email as soon as possible when the water is full
+        if self.moisture > self.moisture_thre:
+            self.send_email()
+        # Send email if battery is low
+        if self.low_bat:
+            self.send_email()
+        # Send email when this program starts or email is not sent for a day
+        if self.last_communication is None:
+            self.send_email()
+        elif rospy.Time.now() - self.last_communication > 24 * 60 * 60:
+            self.send_email()
+        else:
+            pass
 
     # Reset rosserial by sending SIGTERM to rosserial
     # See https://answers.ros.org/question/271776/how-can-i-retrieve-a-list-of-process-ids-of-ros-nodes/  # NOQA
