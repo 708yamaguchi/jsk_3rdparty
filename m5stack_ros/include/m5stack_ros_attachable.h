@@ -23,8 +23,10 @@ void startCb( const std_msgs::Empty& start_msg ){ is_sleeping = false; };
 ros::Subscriber<std_msgs::Empty> stop_sub("stop", &stopCb);
 ros::Subscriber<std_msgs::Empty> start_sub("start", &startCb);
 
-void setupBatteryPublisher() {
-  setupIP5306();
+void setupBatteryPublisher(bool read_battery = true) {
+  if (read_battery) {
+    setupIP5306();
+  }
   nh.advertise(level_pub);
   nh.advertise(charging_pub);
 }
@@ -39,8 +41,10 @@ void setupSleepSubscriber() {
   nh.subscribe(start_sub);
 }
 
-void publishBattery() {
-  measureIP5306();
+void publishBattery(bool read_battery = true) {
+  if (read_battery) {
+    setupIP5306();
+  }
   level_msg.data = battery_level;
   charging_msg.data = isCharging;
   level_pub.publish(&level_msg);
@@ -88,7 +92,7 @@ void afterSetup() {
 
 // This function is additional loop process for m5stack_ros.
 // This function should be called after every loop()
-void beforeLoop() {
+void beforeLoop(bool read_battery = true) {
   // Do not enter main loop when is_sleeping is true
   while (is_sleeping || isCharging) {
     if (is_sleeping) {
@@ -99,9 +103,9 @@ void beforeLoop() {
       blinkCharging();
     }
     nh.spinOnce();
-    publishBattery();
+    publishBattery(read_battery);
     publishModuleInfo();
   }
-  publishBattery();
+  publishBattery(read_battery);
   publishModuleInfo();
 }
