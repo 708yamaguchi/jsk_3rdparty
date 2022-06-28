@@ -18,6 +18,9 @@ jpeg_data_t jpeg_data;
 
 // Byte array to detect packet header
 static const uint8_t packet_header[4] = { 0xFF, 0xD8, 0xEA, 0x01 };
+// Byte array to stop/start UnitV
+static const uint8_t packet_stop[4] = { 0xFF, 0xD8, 0xEA, 0x02 };
+static const uint8_t packet_start[4] = { 0xFF, 0xD8, 0xEA, 0x03 };
 
 sensor_msgs::CompressedImage unitv_img_msg;
 ros::Publisher unitv_img_pub("unitv_image/compressed", &unitv_img_msg);
@@ -136,13 +139,24 @@ void pub_unitv_image () {
   unitv_class_pub.publish( &unitv_class_msg );
 }
 
-// Send packet to temporary disable UnitV
-void write_data() {
+// Send packet to temporary disable UnitV UART
+void write_packet_header() {
   Serial2.write(packet_header, 4);
 }
 
+// Send packet to stop UnitV
+void write_packet_stop() {
+  Serial2.write(packet_stop, 4);
+}
+
+// Send packet to start UnitV
+// This is effective only when UnitV is already stopped
+void write_packet_start() {
+  Serial2.write(packet_start, 4);
+}
+
 void enableI2C() {
-  write_data();
+  write_packet_header();
   delay(1000);
   Serial2.end();
   Wire.begin();
@@ -151,6 +165,15 @@ void enableI2C() {
 void disableI2C() {
   Wire.endTransmission(true);
   Serial2.begin(115200, SERIAL_8N1, 21, 22);
+}
+
+void wait_for_unitv_image() {
+  Serial.println("Wait for UnitV image to come.");
+  while (!Serial2.available()) {
+    delay(10);
+  }
+  receive_recog_image();
+  Serial.println("UnitV image has come.");
 }
 
 void setup() {
@@ -171,13 +194,9 @@ void setup() {
   // Wait for UnitV to initialize (to start accepting write_data() input)
   Serial.println("Wait for UnitV to wake up");
   Serial2.begin(115200, SERIAL_8N1, 21, 22);
-  while (!Serial2.available()) {
-    delay(10);
-  }
-  receive_recog_image();
-  Serial.println("The first image has come.");
+  wait_for_unitv_image();
 
-  // Temporary disable UART and enable I2C. In the meantime, initialize battery module. 
+  // Temporary disable UART and enable I2C. In the meantime, initialize battery module.
   enableI2C();
   M5.Power.begin();
   afterSetup();
@@ -194,7 +213,15 @@ void loop() {
       enableI2C();
       measureIP5306();
       disableI2C();
+      if (is_sleeping || isCharging) {
+        // Stop UnitV to save computation power and M5Stack battery
+        wait_for_unitv_image();
+        write_packet_stop();
+        Serial.println("Stop UnitV to save battery");
+      }
       beforeLoop(false);
+      write_packet_start();
+      Serial.println("Restart UnitV");
       loop_count = 0;
     }
     else {
