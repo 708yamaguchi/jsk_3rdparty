@@ -136,6 +136,7 @@ void pub_unitv_image () {
   unitv_class_pub.publish( &unitv_class_msg );
 }
 
+// Send packet to temporary disable UnitV
 void write_data() {
   Serial2.write(packet_header, 4);
 }
@@ -153,42 +154,52 @@ void disableI2C() {
 }
 
 void setup() {
+  // Setup ROS except battery modules
   setupM5stackROS();
+  M5.Lcd.setBrightness(0);
+  strcpy(sensor_type, "ai_camera");
+  strcpy(attach_type, "absorption_sheet");
+  nh.advertise(unitv_img_pub);
+  nh.advertise(unitv_rects_pub);
+  nh.advertise(unitv_class_pub);
 
   // malloc size must be less than 8192 byte.
   // https://www.mgo-tec.com/blog-entry-trouble-shooting-esp32-wroom.html/5#title30
   // malloc size must be larger than the size of the JPEG image received from UnitV.
   jpeg_data.buf = (uint8_t *) malloc(sizeof(uint8_t) * 7000);
 
+  // Wait for UnitV to initialize (to start accepting write_data() input)
   Serial.println("Wait for UnitV to wake up");
   Serial2.begin(115200, SERIAL_8N1, 21, 22);
-  delay(8000);
+  while (!Serial2.available()) {
+    delay(10);
+  }
+  receive_recog_image();
+  Serial.println("The first image has come.");
+
+  // Temporary disable UART and enable I2C. In the meantime, initialize battery module. 
   enableI2C();
-  setupIP5306();
-  strcpy(sensor_type, "ai_camera");
-  strcpy(attach_type, "absorption_sheet");
+  M5.Power.begin();
   afterSetup();
   disableI2C();
-
-  nh.advertise(unitv_img_pub);
-  nh.advertise(unitv_rects_pub);
-  nh.advertise(unitv_class_pub);
 }
 
 void loop() {
-  // For every 100 UnitV images published, battery info is published.
-  // Note that UnitV image is published at about 1Hz
-  if (loop_count == 10) {
-    enableI2C();
-    beforeLoop();
-    disableI2C();
-    loop_count = 0;
-  }
-
   // Publish UnitV image
   if (Serial2.available()) {
     receive_recog_image();
-    pub_unitv_image();
+    // For every 100 UnitV images published, battery info is published.
+    // Note that UnitV image is published at about 1Hz
+    if (loop_count == 100) {
+      enableI2C();
+      measureIP5306();
+      disableI2C();
+      beforeLoop(false);
+      loop_count = 0;
+    }
+    else {
+      pub_unitv_image();
+    }
     loop_count++;
     Serial.print("loop_count: ");
     Serial.println(loop_count);
