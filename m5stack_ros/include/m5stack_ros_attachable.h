@@ -43,7 +43,7 @@ void setupSleepSubscriber() {
 
 void publishBattery(bool read_battery = true) {
   if (read_battery) {
-    setupIP5306();
+    measureIP5306();
   }
   level_msg.data = battery_level;
   charging_msg.data = isCharging;
