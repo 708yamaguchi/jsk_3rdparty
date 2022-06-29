@@ -16,6 +16,15 @@ typedef struct {
 jpeg_data_t jpeg_data;
 #define DATA_SIZE 64 // data size except image data
 
+#define DRAW_ON_LCD
+#ifdef DRAW_ON_LCD
+  // See https://qiita.com/Nabeshin/items/9268dc88927123319549
+  #define LGFX_M5STACK
+  // LovyanGFX version 0.4.1 is used
+  #include <LovyanGFX.hpp>
+  static LGFX lcd;
+#endif
+
 // Byte array to detect packet header
 static const uint8_t packet_header[4] = { 0xFF, 0xD8, 0xEA, 0x01 };
 // Byte array to stop/start UnitV
@@ -137,6 +146,25 @@ void pub_unitv_image () {
   char *target_names[1] = {"dummy"};
   unitv_class_msg.target_names = target_names;
   unitv_class_pub.publish( &unitv_class_msg );
+
+  #ifdef DRAW_ON_LCD
+    lcd.drawJpg(jpeg_data.buf, jpeg_data.length,0, 0, 320, 240, 0, 0, ::JPEG_DIV_NONE);
+    // Camera image is scaled in UnitV
+    // We need to calculate rectanble position considering the scale
+    float scale = 0.6;
+    M5.Lcd.drawRect(
+      int(rects[0] / scale),
+      int(rects[1] / scale),
+      int(rects[2] / scale),
+      int(rects[3] / scale),
+      RED);
+    int string_x = max(0, min(320, int(rects[0]/scale)));
+    int string_y = max(0, min(320, int(rects[1]/scale)));
+    M5.Lcd.drawString(
+      class_str,
+      string_x,
+      string_y);
+  #endif
 }
 
 // Send packet to temporary disable UnitV UART
@@ -179,7 +207,16 @@ void wait_for_unitv_image() {
 void setup() {
   // Setup ROS except battery modules
   setupM5stackROS();
-  M5.Lcd.setBrightness(0);
+  #ifdef DRAW_ON_LCD
+    lcd.init();
+    lcd.setRotation(1);
+    lcd.setBrightness(255);
+    lcd.setColorDepth(16);
+    lcd.clear();
+    M5.Lcd.setTextSize(3);
+  #else
+    M5.Lcd.setBrightness(0);
+  #endif
   strcpy(sensor_type, "ai_camera");
   strcpy(attach_type, "absorption_sheet");
   nh.advertise(unitv_img_pub);
