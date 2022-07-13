@@ -7,6 +7,8 @@
 // - Adafruit_BMP280 version 2.6.3
 //   https://github.com/adafruit/Adafruit_BMP280_Library
 
+#define ROSSERIAL_ARDUINO_BLUETOOTH
+
 #include <m5stack_ros_with_battery.h>
 #include <std_msgs/Float32.h>
 #include <M5_ENV_III.h>
@@ -28,8 +30,11 @@ void publishENV() {
 }
 
 void setup() {
-  setupM5stackROS("M5Stack ROS ENVIII");
-  setupENV();
+  std::string device_name = getDeviceName("M5Stack ROS ENVIII with battery");
+  char name[256];
+  strcpy(name, device_name.c_str());
+  setupM5stackROS(name);
+  setupENV(device_name);
   nh.advertise(tmp_pub);
   nh.advertise(hum_pub);
   nh.advertise(pressure_pub);

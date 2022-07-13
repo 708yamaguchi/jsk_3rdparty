@@ -41,6 +41,18 @@
 // MAX_SUBSCRIBERS, MAX_PUBLISHERS, INPUT_SIZE, OUTPUT_SIZE
 ros::NodeHandle_<ArduinoHardware, 25, 25, 8192, 8192> nh;
 
+std::string getDeviceName(std::string basename) {
+  std::string serial_number( __TIMESTAMP__ );
+#if defined(ROSSERIAL_ARDUINO_TCP)
+  std::string device_name(basename + " with tcp serial burned at " + serial_number);
+#elif defined(ROSSERIAL_ARDUINO_BLUETOOTH)
+  std::string device_name(basename + " with bluetooth serial burned at " + serial_number);
+#else
+  std::string device_name(basename + " with serial burned at " + serial_number);
+#endif
+  return device_name;
+}
+
 void setupM5stackROS(char *name) {
   M5.begin();
   #if defined(M5STACK)

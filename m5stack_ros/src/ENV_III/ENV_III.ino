@@ -7,12 +7,11 @@
 // - Adafruit_BMP280 version 2.6.3
 //   https://github.com/adafruit/Adafruit_BMP280_Library
 
+#define ROSSERIAL_ARDUINO_BLUETOOTH
+
 #include <m5stack_ros.h>
 #include <std_msgs/Float32.h>
 #include <M5_ENV_III.h>
-
-std::string serial_number( __TIMESTAMP__ );
-std::string device_name("M5Stack ROS ENVIII burned at " + serial_number);
 
 std_msgs::Float32 tmp_msg;
 ros::Publisher tmp_pub("temperature", &tmp_msg);
@@ -31,7 +30,8 @@ void publishENV() {
 }
 
 void setup() {
-  char name[128];
+  std::string device_name = getDeviceName("M5Stack ROS ENVIII");
+  char name[256];
   strcpy(name, device_name.c_str());
   setupM5stackROS(name);
   setupENV(device_name);
