@@ -11,6 +11,9 @@
 #include <std_msgs/Float32.h>
 #include <M5_ENV_III.h>
 
+std::string serial_number( __TIMESTAMP__ );
+std::string device_name("M5Stack ROS ENVIII burned at " + serial_number);
+
 std_msgs::Float32 tmp_msg;
 ros::Publisher tmp_pub("temperature", &tmp_msg);
 std_msgs::Float32 hum_msg;
@@ -28,8 +31,10 @@ void publishENV() {
 }
 
 void setup() {
-  setupM5stackROS("M5Stack ROS ENVIII");
-  setupENV();
+  char name[128];
+  strcpy(name, device_name.c_str());
+  setupM5stackROS(name);
+  setupENV(device_name);
 
   nh.advertise(tmp_pub);
   nh.advertise(hum_pub);
