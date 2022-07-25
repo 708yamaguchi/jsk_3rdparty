@@ -36,7 +36,7 @@ void setup() {
   esp_read_mac(bt_mac, ESP_MAC_BT);
   snprintf(device_name,
            127,
-           "ENVIII %02X:%02X:%02X:%02X:%02X:%02X",
+           "ENVIII %02X %02X %02X %02X %02X %02X",
            bt_mac[0],
            bt_mac[1],
            bt_mac[2],
