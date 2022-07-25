@@ -36,11 +36,11 @@ float tmp      = 0.0;
 float hum      = 0.0;
 float pressure = 0.0;
 
-void setupENV() {
+void setupENV(char* device_name) {
   M5.lcd.setTextSize(2);  // Set the text size to 2.  设置文字大小为2
   Wire.begin();  // Wire init, adding the I2C bus.  Wire初始化, 加入i2c总线
   qmp6988.init();
-  M5.lcd.println(F("ENV Unit III test"));
+  M5.lcd.println(F(device_name));
 }
 
 void measureENV() {
