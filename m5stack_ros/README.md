@@ -207,6 +207,38 @@ With this package, you can use following devices. To use each device, please see
     - The Timer Camera F is a fisheye camera module based on ESP32-D0WDQ6-V3 with 8M PSRAM and 4M Flash on board.
     - [README](https://github.com/jsk-ros-pkg/jsk_3rdparty/tree/master/m5stack_ros/sketches/TimerCam)
 
+## Autostart by Systemd
+
+By using Systemd, the m5stack_ros program can be started automatically.
+
+1. Edit `config/m5stack_ros.service` and write your main program to `ExecStart` section.
+
+2. Place the config file to systemd config direcoty
+
+    ```
+    cp $(rospack find m5stack_ros)/config/m5stack_ros.service /etc/systemd/system
+    ```
+
+3. Enable autostart of the service
+
+    ```
+    # Check if the service is autostart or not
+    sudo systemctl is-enabled m5stack_ros.service
+    # Enable autostart
+    sudo systemctl enable m5stack_ros.service
+    ```
+
+If you use bluetooth connection, please run the following additional steps.
+
+  - Edit, place and enable `config/rfcomm_bind.service` like the above `config/m5stack_ros.service`.
+  - Edit `config/rfcomm_devices.yaml`, in which Bluetooth MAC address of the M5 device is set.
+  - Clone `jsk_robot_startup` to your workspace and catkin build it.
+    ```
+    cd ~/m5stack_ros_ws/src/jsk-ros-pkg
+    git clone https://github.com/jsk-ros-pkg/jsk_robot.git
+    catkin build jsk_robot_startup
+    ```
+
 ## Tested environment
 
 ### Hardware

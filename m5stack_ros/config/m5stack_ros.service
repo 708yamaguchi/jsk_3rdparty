@@ -1,0 +1,14 @@
+# Edit launch file in ExecStart section according to your application
+
+[Unit]
+Description=launch main rosserial programs
+After=networking.service
+
+[Service]
+Type=simple
+Restart=on-success
+Environment=M5STACK_ROS_WS=/home/ubuntu/m5stack_ros_ws
+ExecStart=/bin/bash -c ". ${M5STACK_ROS_WS}/devel/setup.bash && roslaunch m5stack_ros m5stack_ros.launch"
+
+[Install]
+WantedBy=multi-user.target
