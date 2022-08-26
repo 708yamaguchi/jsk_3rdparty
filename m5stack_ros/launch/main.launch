@@ -1,0 +1,21 @@
+<launch>
+
+  <!-- Device file name depends on /etc/udev/rules.d/99-m5stack-ros.rules -->
+
+  <include file="$(find m5stack_ros)/launch/timer_cam_with_email.launch">
+    <arg name="port" value="/dev/rfcomm1" />
+  </include>
+
+  <include file="$(find m5stack_ros)/launch/m5stack_ros.launch">
+    <arg name="port" value="/dev/TOF" />
+    <arg name="baud" value="57600" />
+    <arg name="rosserial_name" value="rosserial_tof" />
+  </include>
+
+  <include file="$(find m5stack_ros)/launch/m5stack_ros.launch">
+    <arg name="port" value="/dev/GAS" />
+    <arg name="baud" value="57600" />
+    <arg name="rosserial_name" value="rosserial_gas" />
+  </include>
+
+</launch>

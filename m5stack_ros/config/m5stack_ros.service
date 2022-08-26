@@ -8,7 +8,7 @@ Type=simple
 Restart=on-success
 Environment=M5STACK_ROS_WS=/home/ubuntu/m5stack_ros_ws
 # --wait is important to wait for the roscore to come up
-ExecStart=/bin/bash -c ". ${M5STACK_ROS_WS}/devel/setup.bash && roslaunch m5stack_ros m5stack_ros.launch --wait"
+ExecStart=/bin/bash -c ". ${M5STACK_ROS_WS}/devel/setup.bash && roslaunch m5stack_ros main.launch --wait"
 
 [Install]
 WantedBy=default.target

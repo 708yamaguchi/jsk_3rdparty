@@ -31,7 +31,7 @@ class EmailRosserial(object):
         self.low_bat = False
         self.bat_level = None
         # Publish email
-        self.email_duration = rospy.get_param('~email_duration', 24 * 60 * 60)
+        self.email_duration = rospy.get_param('~email_duration', 1 * 60 * 60)
         self.pub = rospy.Publisher('email', Email, queue_size=1)
         # Check status of M5 device and sensor and send email if needed
         self.check_duration = rospy.get_param('~check_duration', 30)
@@ -40,8 +40,10 @@ class EmailRosserial(object):
         self.device_name = 'M5Stack'
         self.subject = 'Subject'
         self.low_bat_thre = 3.6
-        self.sender_address = ''
-        self.receiver_address = ''
+        self.sender_address = 'yamaguchi_sensor@jsk.imi.i.u-tokyo.ac.jp'
+        self.receiver_address = 'yamaguchi_sensor@jsk.imi.i.u-tokyo.ac.jp'
+        # self.sender_address = 'yamaguchi@jsk.imi.i.u-tokyo.ac.jp'
+        # self.receiver_address = 'yamaguchi@jsk.imi.i.u-tokyo.ac.jp'
 
     def battery_level_cb(self, msg):
         self.bat_level = msg.data
