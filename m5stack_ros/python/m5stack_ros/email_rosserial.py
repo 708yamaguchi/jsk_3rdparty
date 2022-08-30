@@ -116,17 +116,17 @@ class EmailRosserial(object):
         email_body.message = message
         return [email_body]
 
-    # Low battery or next day, send email
+    # Send email if M5 battery is low
+    # or email has not been sent for self.email_duration[s]
     def check_status(self, event):
         """
         Check M5 device status and send email if needed.
         """
         rospy.loginfo('Check status of M5 device')
-        # Send email if battery is low
         if self.low_bat:
             self.send_email()
             rospy.loginfo('Send email because battery is low')
-        # Send email when this program starts or email is not sent for a day
+            return
         if self.last_send_email is None:
             self.send_email()
             rospy.loginfo('Send email at first time')
@@ -135,7 +135,8 @@ class EmailRosserial(object):
         if secs_from_last_email > self.email_duration:
             self.send_email()
             rospy.loginfo(
-                'Send email because email have not been sent for a day')
+                'Send email because it has not been sent for {} [s]'.format(
+                    self.email_duration))
         else:
             rospy.loginfo('Timer is called, but do not send email')
 
