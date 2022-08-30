@@ -14,7 +14,7 @@
   <node pkg="m5stack_ros" type="email_spot_cooler.py" name="email_spot_cooler"
         output="screen" respawn="true">
     <rosparam subst_value="true">
-      rosserial_name: $(arg rosserial_name)
+      battery_rosserial_name: $(arg rosserial_name)
     </rosparam>
   </node>
 
