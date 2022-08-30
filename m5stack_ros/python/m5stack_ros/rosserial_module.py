@@ -13,6 +13,14 @@ except ImportError:
 
 
 class RosserialModule(object):
+    """
+    This is base class to communicate with devices communicated via rosserial
+
+    Regularly, this class resets serial_node.py
+    This is because the connection between serial_node.py and the M5 device
+    is terminated by the M5 device deepsleep.
+    """
+
     # If rosserial_name is not given, reset_rosserial() does not work
     def __init__(self, rosserial_name=None):
         self.last_communication = None

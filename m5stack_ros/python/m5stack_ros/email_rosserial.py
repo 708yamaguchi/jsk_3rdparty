@@ -9,15 +9,13 @@ class EmailRosserial(object):
     """
     This is base class to daily sends email according to the M5 device status.
 
-    Regularly, it resets serial_node.py
-    This is because the connection between serial_node.py and the M5 device
-    is terminated by the M5 device deepsleep.
-
     To build a new mail notification system by inheriting this class, you need
       - Create an instance of a module that communicates via rosserial
         by inheriting from the RosserialModule class (e.g. self.battery)
       - Override create_mail_body() based on the above created instance
       - Override check_status() based on the above created instance
+      - Set self.modules variables as the list of the above create instance.
+      - Update self.subject, self.sender_address and self.receiver_address
     """
     def __init__(self):
         # Battery module class
@@ -54,7 +52,7 @@ class EmailRosserial(object):
 
     def create_email_body(self):
         """
-        return string of what you want to write in the email body.
+        return list of EmailBody, each of which you want to write in the email.
         """
         email_body = EmailBody()
         email_body.type = 'text'
