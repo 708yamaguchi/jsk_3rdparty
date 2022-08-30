@@ -32,6 +32,11 @@ class EmailSpotCooler(EmailRosserial):
     # Check amount of the water in the tank
     def water_email_body(self):
         message = self.earth.message()
+        if self.earth.moisture is None or \
+           self.earth.moisture > self.earth.moisture_thre:
+            message += 'タンクに水は溜まっていません。\n'
+        else:
+            message += 'タンクに水が溜まっています。交換してください。\n'
         email_body = EmailBody()
         email_body.type = 'text'
         email_body.message = message

@@ -19,10 +19,5 @@ class EARTH(RosserialModule):
         self.last_communication = rospy.Time.now()
 
     def message(self):
-        message = ''
-        if self.moisture is None or self.moisture > self.moisture_thre:
-            message += 'タンクに水は溜まっていません。\n'
-        else:
-            message += 'タンクに水が溜まっています。交換してください。\n'
-        message += '水分量 {} （基準値3000）\n'.format(self.moisture)
+        message = '水分量 {} （基準値3000）\n'.format(self.moisture)
         return message

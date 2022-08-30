@@ -4,11 +4,10 @@
 import cv2
 from cv_bridge import CvBridge
 from jsk_robot_startup.msg import EmailBody
-from m5stack_ros import EmailRosserial
+from m5stack_ros import EmailRosserial, GroveMultiChannelGas, ToF
 import os
 import rospy
 from sensor_msgs.msg import Image
-from std_msgs.msg import UInt16
 
 
 class EmailFridgeContents(EmailRosserial):
@@ -25,17 +24,9 @@ class EmailFridgeContents(EmailRosserial):
         # Subscribers
         rospy.Subscriber('timer_cam_image', Image, self.image_cb)
         self.img_file_path = '/tmp/email_fridge_contents.png'
-        self.gas_info = [
-            {'Name': 'NO2', 'Topic': 'gas_v2_102b', 'Concentration': None},
-            {'Name': 'C2H5CH', 'Topic': 'gas_v2_302b', 'Concentration': None},
-            {'Name': 'VOC', 'Topic': 'gas_v2_502b', 'Concentration': None},
-            {'Name': 'CO', 'Topic': 'gas_v2_702b', 'Concentration': None}]
-        gas_topic_names = [gas['Topic'] for gas in self.gas_info]
-        for gas_topic_name in gas_topic_names:
-            rospy.Subscriber(
-                gas_topic_name, UInt16, self.gas_cb, gas_topic_name)
-        rospy.Subscriber('tof', UInt16, self.tof_cb)
-        self.tof = None
+
+        self.gas = GroveMultiChannelGas()
+        self.tof = ToF()
         self.tof_threshold = 30
         # Do not send old image
         if os.path.exists(self.img_file_path):
@@ -46,16 +37,6 @@ class EmailFridgeContents(EmailRosserial):
         bridge = CvBridge()
         img = bridge.imgmsg_to_cv2(msg)
         cv2.imwrite(self.img_file_path, img)
-        self.update_last_communication()
-
-    def gas_cb(self, msg, gas_topic_name):
-        for gas_info in self.gas_info:
-            if gas_info['Topic'] == gas_topic_name:
-                gas_info['Concentration'] = msg.data
-        self.update_last_communication()
-
-    def tof_cb(self, msg):
-        self.tof = msg.data
         self.update_last_communication()
 
     # When door is left open, low battery or next day, send email
@@ -83,29 +64,23 @@ class EmailFridgeContents(EmailRosserial):
     def email_gas_body(self, index):
         email_body = EmailBody()
         email_body.type = 'text'
-        gas_info = self.gas_info[index]
-        if gas_info['Concentration'] is None:
-            email_body.message = '冷蔵庫の{}のデータは届いていません\n'.format(
-                gas_info['Name'])
-        else:
-            email_body.message = '冷蔵庫の{}の濃度は{}です\n'.format(
-                gas_info['Name'], gas_info['Concentration'])
-        email_body.message += '\n'  # end of this section
+        email_body.message = self.gas.message(index)
         return email_body
 
     # Check the fridge door state by tof
     def email_tof_body(self):
         email_body = EmailBody()
         email_body.type = 'text'
-        if self.tof is None:
+        email_body.message = self.tof.message()
+        if self.tof.tof is None:
             email_body.message = '冷蔵庫のToFのデータは届いていません\n'
         else:
-            if self.tof > self.tof_threshold:
+            if self.tof.tof > self.tof_threshold:
                 email_body.message += '冷蔵庫の扉が開いたままです。(ToF: {})\n'.format(
-                    self.tof)
+                    self.tof.tof)
             else:
                 email_body.message += '冷蔵庫の扉は閉じられています。(ToF: {})\n'.format(
-                    self.tof)
+                    self.tof.tof)
         email_body.message += '\n'  # end of this section
         return email_body
 

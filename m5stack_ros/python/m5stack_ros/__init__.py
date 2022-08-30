@@ -2,3 +2,4 @@ from rosserial_module import RosserialModule
 from battery import Battery
 from earth import EARTH
 from email_rosserial import EmailRosserial
+from grove_multichannel_gas_v2 import GroveMultiChannelGas
