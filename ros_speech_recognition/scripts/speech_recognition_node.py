@@ -107,7 +107,7 @@ class ROSAudio(SR.AudioSource):
                 # take out target_channel channel data from multi channel data
                 data = array.array(dtype, bytes(msg.data)).tolist()
                 chan_data = data[self.target_channel::self.n_channel]
-                self.buffer += array.array(dtype, chan_data).tostring()
+                self.buffer += array.array(dtype, chan_data).tobytes()
                 overflow = len(self.buffer) - self.buffer_size
                 if overflow > 0:
                     self.buffer = self.buffer[overflow:]
@@ -136,13 +136,13 @@ class ROSSpeechRecognition(object):
             self.act_sound = None
         self.signals = {
             "start": rospy.get_param("~start_signal",
-                                     "/usr/share/sounds/freedesktop/stereo/bell.ogg"),
+                                     "/usr/share/sounds/freedesktop/stereo/bell.oga"),
             "recognized": rospy.get_param("~recognized_signal",
-                                          "/usr/share/sounds/freedesktop/stereo/message.ogg"),
+                                          "/usr/share/sounds/freedesktop/stereo/message.oga"),
             "success": rospy.get_param("~success_signal",
-                                       "/usr/share/sounds/freedesktop/stereo/message-new-instant.ogg"),
+                                       "/usr/share/sounds/freedesktop/stereo/message-new-instant.oga"),
             "timeout": rospy.get_param("~timeout_signal",
-                                       "/usr/share/sounds/freedesktop/stereo/network-connectivity-lost.ogg"),
+                                       "/usr/share/sounds/freedesktop/stereo/network-connectivity-lost.oga"),
         }
 
 
