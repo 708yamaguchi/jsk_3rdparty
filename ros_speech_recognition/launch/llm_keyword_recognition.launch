@@ -56,6 +56,15 @@
   <node name="llm_qwen_2_5"
 	pkg="ros_speech_recognition" type="llm-qwen2.5-1.5B.py"
 	respawn="true" output="screen">
+    <rosparam>
+      keywords:
+        - おはよう
+        - ごはん
+        - 学校
+        - ロボット
+        - 研究
+        - ゲーム
+    </rosparam>
   </node>
 
 </launch>

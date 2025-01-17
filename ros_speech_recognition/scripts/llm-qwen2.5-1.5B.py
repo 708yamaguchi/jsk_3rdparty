@@ -163,10 +163,14 @@ def main(host, port, mode="ROS"):
         if mode == "ROS":
             # ROS topic input mode
             rospy.init_node('llm_qwen2_5')
-            keywords = rospy.get_param("~keywords", ['おはよう', 'ご飯', '学校', 'ロボット'])
+            keywords = rospy.get_param("~keywords", [])
+            if len(keywords) == 0:
+                rospy.logerr("Please set list of string to '~keywords' param.")
+                exit()
             prompt = "あなたはユーザーアシスタントです。ユーザの入力のうち、以下の言葉に最も近いものを、単語だけで返してください。近いものがなければNoneを返してください。"
             for keyword in keywords:
                 prompt += f"「{keyword}」"
+            rospy.loginfo(f"prompt: {prompt}")
             llm_client.setup(prompt)
             print("Setup LLM finished.")
             ROSLLMBridge(llm_client)
