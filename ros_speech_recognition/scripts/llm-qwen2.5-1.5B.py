@@ -1,9 +1,13 @@
 # Mainly copied from
 # https://github.com/Abandon-ht/ModuleLLM_Development_Guide/blob/fb7f6871dcb2f23f6d74e88c65a29dee43f67988/PC/python/llm-qwen2.5-1B.py
 
-import socket
-import json
 import argparse
+import json
+import socket
+
+import rospy
+from speech_recognition_msgs.msg import SpeechRecognitionCandidates
+from std_msgs.msg import String
 
 
 class TCPClient:
@@ -91,6 +95,7 @@ class LLMClient:
         })
 
     def handle_inference_response(self):
+        full_response = ""
         while True:
             response = self.tcp_client.receive_response()
             response_data = json.loads(response)
@@ -98,13 +103,11 @@ class LLMClient:
             if data is None:
                 break
 
-            delta = data.get('delta')
-            finish = data.get('finish')
-            print(delta, end='', flush=True)
-
-            if finish:
-                print()
+            full_response += data.get('delta')
+            if data.get('finish'):
                 break
+
+        return full_response
 
     def _parse_inference_response(self, response_data):
         error = response_data.get('error')
@@ -123,6 +126,29 @@ class LLMClient:
         response = self.tcp_client.receive_response()
         response_data = json.loads(response)
         print("Exit Response:", response_data)
+
+
+class ROSLLMBridge:
+    def __init__(self, llm_client):
+        self.llm_client = llm_client
+        rospy.Subscriber('/speech_to_text', SpeechRecognitionCandidates, self.speech_to_text_callback)
+        self.keyword_pub = rospy.Publisher('/text_to_keyword', String, queue_size=10)
+
+    def speech_to_text_callback(self, msg):
+        if not msg.transcript:
+            rospy.logwarn("Received empty transcript.")
+            return
+
+        # Use the first transcript with the highest confidence
+        user_input = msg.transcript[0]
+        rospy.loginfo(f"Received input from /speech_to_text: {user_input}")
+
+        # Send input to LLM and publish the response
+        self.llm_client.send_inference_request(user_input)
+        inference_response = self.llm_client.handle_inference_response()
+        if inference_response:
+            self.keyword_pub.publish(String(data=inference_response))
+            rospy.loginfo(f"Published to /text_to_keyword: {inference_response}")
 
 
 def main(host, port):
