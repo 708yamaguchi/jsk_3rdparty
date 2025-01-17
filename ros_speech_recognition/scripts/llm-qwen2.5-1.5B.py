@@ -45,6 +45,14 @@ class LLMClient:
         self.work_id = None
 
     @staticmethod
+    def create_reset_data():
+        return {
+            "request_id": "11212155",
+            "work_id": "llm",
+            "action": "reset"
+        }
+
+    @staticmethod
     def create_init_data(prompt):
         return {
             "request_id": "llm_001",
@@ -62,6 +70,10 @@ class LLMClient:
         }
 
     def setup(self, prompt):
+        reset_data = self.create_reset_data()
+        self.tcp_client.send_json(reset_data)
+        response = self.tcp_client.receive_response()
+
         init_data = self.create_init_data(prompt)
         self.tcp_client.send_json(init_data)
         response = self.tcp_client.receive_response()
