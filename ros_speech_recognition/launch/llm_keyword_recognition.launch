@@ -17,13 +17,6 @@
   <arg name="tts_tolerance" default="1.0" doc="Tolerance second for recognizing whether robot is speaking or not" />
   <arg name="tts_action_names" default="['sound_play']" doc="tts action name. these servers outputs are ignored by sound_recognition" />
 
-  <!-- sound play -->
-  <!-- <node name="sound_play" pkg="sound_play" type="soundplay_node.py" -->
-  <!--       if="$(arg launch_sound_play)" -->
-  <!--       respawn="true"> -->
-  <!--   <remap from="robotsound" to="sound_play" /> -->
-  <!-- </node> -->
-
   <!-- audio capture from microphone -->
   <node name="audio_capture" pkg="audio_capture" type="audio_capture"
         if="$(arg launch_audio_capture)"
@@ -60,9 +53,9 @@
     </rosparam>
   </node>
 
-  <!-- <node name="speech_recognition_candidates_to_string" -->
-  <!--       pkg="ros_speech_recognition" type="speech_recognition_candidates_to_string.py" -->
-  <!--       output="screen"> -->
-  <!--   <remap from="~input" to="$(arg voice_topic)" /> -->
-  <!-- </node> -->
+  <node name="llm_qwen_2_5"
+	pkg="ros_speech_recognition" type="llm-qwen2.5-1.5B.py"
+	respawn="true" output="screen">
+  </node>
+
 </launch>

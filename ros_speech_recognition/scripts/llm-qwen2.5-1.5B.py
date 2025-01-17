@@ -1,7 +1,8 @@
+#!/usr/bin/env python
+
 # Mainly copied from
 # https://github.com/Abandon-ht/ModuleLLM_Development_Guide/blob/fb7f6871dcb2f23f6d74e88c65a29dee43f67988/PC/python/llm-qwen2.5-1B.py
 
-import argparse
 import json
 import socket
 
@@ -180,9 +181,6 @@ def main(host, port, mode="ROS"):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='TCP Client to send JSON data.')
-    parser.add_argument('--host', type=str, default='localhost', help='Server hostname (default: localhost)')
-    parser.add_argument('--port', type=int, default=10001, help='Server port (default: 10001)')
-
-    args = parser.parse_args()
-    main(args.host, args.port)
+    host = "localhost"
+    port = 10001
+    main(host, port)
