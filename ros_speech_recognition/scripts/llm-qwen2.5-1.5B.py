@@ -45,7 +45,7 @@ class LLMClient:
         self.work_id = None
 
     @staticmethod
-    def create_init_data():
+    def create_init_data(prompt):
         return {
             "request_id": "llm_001",
             "work_id": "llm",
@@ -57,12 +57,12 @@ class LLMClient:
                 "input": "llm.utf-8.stream",
                 "enoutput": True,
                 "max_token_len": 1023,
-                "prompt": "あなたはユーザーアシスタントです。ユーザの入力のうち、以下の言葉に最も近いものを、単語だけで返してください。近いものがなければNoneを返してください。「サーボオン」「サーボオフ」「教示開始」「教示終了」「再生開始」「再生終了」"
+                "prompt": prompt
             }
         }
 
-    def setup(self):
-        init_data = self.create_init_data()
+    def setup(self, prompt):
+        init_data = self.create_init_data(prompt)
         self.tcp_client.send_json(init_data)
         response = self.tcp_client.receive_response()
         response_data = json.loads(response)
@@ -159,15 +159,22 @@ def main(host, port, mode="ROS"):
     try:
         tcp_client.connect()
         print("Setup LLM...")
-        llm_client.setup()
-        print("Setup LLM finished.")
 
         if mode == "ROS":
             # ROS topic input mode
             rospy.init_node('llm_qwen2_5')
+            keywords = rospy.get_param("~keywords", ['おはよう', 'ご飯', '学校', 'ロボット'])
+            prompt = "あなたはユーザーアシスタントです。ユーザの入力のうち、以下の言葉に最も近いものを、単語だけで返してください。近いものがなければNoneを返してください。"
+            for keyword in keywords:
+                prompt += f"「{keyword}」"
+            llm_client.setup(prompt)
+            print("Setup LLM finished.")
             ROSLLMBridge(llm_client)
             rospy.spin()
         else:
+            prompt = input("Enter the first prompt: ")
+            llm_client.setup(prompt)
+            print("Setup LLM finished.")
             # Keyboard input mode
             while True:
                 user_input = input("Enter your message (or 'exit' to quit): ")
