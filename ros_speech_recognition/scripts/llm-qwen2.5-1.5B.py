@@ -161,16 +161,19 @@ def main(host, port):
         llm_client.setup()
         print("Setup LLM finished.")
 
-        while True:
-            user_input = input("Enter your message (or 'exit' to quit): ")
-            if user_input.lower() == 'exit':
-                break
+        # while True:
+        #     user_input = input("Enter your message (or 'exit' to quit): ")
+        #     if user_input.lower() == 'exit':
+        #         break
 
-            llm_client.send_inference_request(user_input)
-            llm_client.handle_inference_response()
+        #     llm_client.send_inference_request(user_input)
+        #     llm_client.handle_inference_response()
 
-        llm_client.exit_session()
+        ROSLLMBridge(llm_client)
+        rospy.spin()
+
     finally:
+        llm_client.exit_session()
         tcp_client.close()
 
 
