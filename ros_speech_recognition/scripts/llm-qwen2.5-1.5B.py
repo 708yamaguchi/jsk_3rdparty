@@ -151,7 +151,7 @@ class ROSLLMBridge:
             rospy.loginfo(f"Published to /text_to_keyword: {inference_response}")
 
 
-def main(host, port):
+def main(host, port, mode="ROS"):
     tcp_client = TCPClient(host, port)
     llm_client = LLMClient(tcp_client)
 
@@ -161,17 +161,19 @@ def main(host, port):
         llm_client.setup()
         print("Setup LLM finished.")
 
-        # while True:
-        #     user_input = input("Enter your message (or 'exit' to quit): ")
-        #     if user_input.lower() == 'exit':
-        #         break
-
-        #     llm_client.send_inference_request(user_input)
-        #     llm_client.handle_inference_response()
-
-        ROSLLMBridge(llm_client)
-        rospy.spin()
-
+        if mode == "ROS":
+            # ROS topic input mode
+            rospy.init_node('llm_qwen2_5')
+            ROSLLMBridge(llm_client)
+            rospy.spin()
+        else:
+            # Keyboard input mode
+            while True:
+                user_input = input("Enter your message (or 'exit' to quit): ")
+                if user_input.lower() == 'exit':
+                    break
+                llm_client.send_inference_request(user_input)
+                llm_client.handle_inference_response()
     finally:
         llm_client.exit_session()
         tcp_client.close()
