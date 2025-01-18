@@ -45,14 +45,6 @@ class LLMClient:
         self.work_id = None
 
     @staticmethod
-    def create_reset_data():
-        return {
-            "request_id": "11212155",
-            "work_id": "llm",
-            "action": "reset"
-        }
-
-    @staticmethod
     def create_init_data(prompt):
         return {
             "request_id": "llm_001",
@@ -70,12 +62,10 @@ class LLMClient:
         }
 
     def setup(self, prompt):
-        # TODO: なぜか、前に設定したプロンプトが残っていることがある
-        # 以下のようにして完全に消去したいが、方法が分かっていない
-        # reset_data = self.create_reset_data()
-        # self.tcp_client.send_json(reset_data)
-        # response = self.tcp_client.receive_response()
-
+        # TODO: tokenizer.pyにpromptが残っているため、最初の1回目以外はここでpromptを更新しても意味がない
+        # /opt/m5stack/bin/llm_llmがkillされてもtokenizer.pyがkillされないのが厄介
+        # tokenizerの場所：/opt/m5stack/scripts/qwen2.5-1.5B-ax630c_tokenizer.py
+        # copied from /opt/m5stack/scripts/qwen2.5-coder-0.5B-ax630c_tokenizer.py
         init_data = self.create_init_data(prompt)
         self.tcp_client.send_json(init_data)
         response = self.tcp_client.receive_response()
