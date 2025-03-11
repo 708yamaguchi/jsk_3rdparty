@@ -18,6 +18,9 @@ ros::Publisher hum_pub("humidity", &hum_msg);
 std_msgs::Float32 pressure_msg;
 ros::Publisher pressure_pub("pressure", &pressure_msg);
 
+uint8_t bt_mac[6];
+char device_name[128];
+
 void publishENV() {
   tmp_msg.data = tmp;
   hum_msg.data = hum;
@@ -28,8 +31,19 @@ void publishENV() {
 }
 
 void setup() {
-  setupM5stackROS("M5Stack ROS ENVIII");
-  setupENV();
+  esp_read_mac(bt_mac, ESP_MAC_BT);
+  snprintf(device_name,
+           127,
+           "ENVIII %02X %02X %02X %02X %02X %02X",
+           bt_mac[0],
+           bt_mac[1],
+           bt_mac[2],
+           bt_mac[3],
+           bt_mac[4],
+           bt_mac[5]);
+  setupM5stackROS(device_name);
+  setupENV(device_name);
+
   nh.advertise(tmp_pub);
   nh.advertise(hum_pub);
   nh.advertise(pressure_pub);
