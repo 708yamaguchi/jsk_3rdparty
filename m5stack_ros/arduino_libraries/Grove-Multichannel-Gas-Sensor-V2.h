@@ -23,7 +23,10 @@
     THE SOFTWARE.1  USA
 */
 
-#include <M5Stack.h>
+// You can use M5STACK or M5ATOM_S3
+/* #define M5ATOM_S3 */
+
+#include <m5stack_ros.h>
 #include <Multichannel_Gas_GMXXX.h>
 
 // if you use the software I2C to drive the sensor, you can uncommnet the define SOFTWAREWIRE which in Multichannel_Gas_GMXXX.h.
@@ -61,11 +64,15 @@ void measureGasV2()
 
 void displayGasV2()
 {
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.setCursor(10, 10);
+  #if defined(M5ATOM_S3)
+    M5.Lcd.setTextSize(1);
+  #else
+    M5.Lcd.setTextSize(2);
+  #endif
+  M5.Lcd.setCursor(0, 0);
 
   M5.Lcd.printf("GM102B: %4u = %.2f V\n", val_102B, gas.calcVol(val_102B));
-  M5.Lcd.printf(" GM302B: %4u = %.2f V\n", val_302B, gas.calcVol(val_302B));
-  M5.Lcd.printf(" GM502B: %4u = %.2f V\n", val_502B, gas.calcVol(val_502B));
-  M5.Lcd.printf(" GM702B: %4u = %.2f V\n", val_702B, gas.calcVol(val_702B));
+  M5.Lcd.printf("GM302B: %4u = %.2f V\n", val_302B, gas.calcVol(val_302B));
+  M5.Lcd.printf("GM502B: %4u = %.2f V\n", val_502B, gas.calcVol(val_502B));
+  M5.Lcd.printf("GM702B: %4u = %.2f V\n", val_702B, gas.calcVol(val_702B));
 }

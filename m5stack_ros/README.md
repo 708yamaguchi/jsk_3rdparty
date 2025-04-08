@@ -47,10 +47,12 @@ Connect the devices to ROS via [M5Stack](https://m5stack.com/) and [rosserial](h
     - Install esp32 by Espressif Systems (Tools -> Board -> Boards Manager -> esp32)
       - Please select version 2.0.0 (> 2.0.1 has bug, 2.0.1 does not work with `TimerCam`).
     - Install M5Stack version 0.3.6 ~ 0.4.0 by [M5Stack](https://github.com/m5stack/M5Stack/tree/0.3.6) (Tools -> Manage Libraries -> M5Stack)
+      - For M5AtomS3, install [M5AtomS3](https://github.com/m5stack/M5AtomS3/tree/1.0.0) version 1.0.0 and [M5Unified](https://github.com/m5stack/M5Unified/tree/0.1.16) version 0.1.16 (Tools -> Manage Libraries)
     - Select correct board type (Tools -> Board -> ESP32 Arduino)
       - M5Stack Grey/Base: M5Stack-Core-ESP32
       - M5Stack Fire: M5Stack-Fire
       - Timer Camera F: M5Stack-Timer-CAM
+      - M5AtomS3: M5Stack-ATOMS3
 
   - Add dependent libraries to arduino library. This script installs libraries that cannot be installed from the Arduino IDE GUI.
 
@@ -103,6 +105,12 @@ Connect the devices to ROS via [M5Stack](https://m5stack.com/) and [rosserial](h
       ```C
       // define nothing
       ```
+
+  - If you use M5AtomS3, define macro at top of `m5stack_ros/arduino_libraries/Grove-Multichannel-Gas-Sensor-V2.h` or `m5stack_ros/arduino_libraries/TGS_Gas_Sensors.h`. When burning, you need to set `USB CDC On Boot: Enabled` and `USB Mode: Hardware CDC and JTAG` in the Tools menu of the Arduino IDE. If you use M5Stack, you don't need define anything.
+
+    ```
+    #define M5ATOM_S3
+    ```
 
   - If you use Wi-Fi, set SSID and password in `m5stack_ros/arduino_libraries/wifi.h`. **DO NOT** upload these information to github.
 
@@ -317,6 +325,7 @@ With the following steps, different symbolic links are created for each M5 devic
 - M5StickC (Only EARTH sensor)
 - M5StickC Plus (Only EARTH sensor)
 - M5Stack Fire (Only SimplePublisher)
+- M5AtomS3 (Only for TGS_Gas_Sensors and Grove-Multichannel-Gas-Sensor-V2, Only checked with USB connection)
 - Timer Camera F (Only TimerCam)
 
 ### Software

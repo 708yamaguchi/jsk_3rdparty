@@ -1,5 +1,4 @@
 #include <TGS_Gas_Sensors.h>
-#include <m5stack_ros.h>
 #include <std_msgs/UInt16.h>
 
 std_msgs::UInt16 tgs_gas_analog_msg;

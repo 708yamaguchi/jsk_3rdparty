@@ -1,5 +1,4 @@
 #include <Grove-Multichannel-Gas-Sensor-V2.h>
-#include <m5stack_ros.h>
 #include <std_msgs/UInt16.h>
 
 std_msgs::UInt16 gas_v2_102b_msg;
